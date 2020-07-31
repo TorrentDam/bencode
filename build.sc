@@ -31,7 +31,7 @@ object bencode extends Module with BintrayPublishModule {
     original.copy(payload = original.payload.filterNot(_._2.contains("javadoc")))
   }
 
-  def publishVersion = "0.1.0"
+  def publishVersion = "0.2.0"
 }
 
 trait Module extends ScalaModule with ScalafmtModule {

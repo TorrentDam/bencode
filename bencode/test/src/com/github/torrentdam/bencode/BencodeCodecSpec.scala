@@ -4,7 +4,7 @@ import java.nio.charset.Charset
 
 import verify._
 
-import scodec.bits.{Bases, BitVector}
+import scodec.bits.BitVector
 import scala.language.experimental
 
 object BencodeCodecSpec extends BasicTestSuite {
@@ -35,7 +35,7 @@ object BencodeCodecSpec extends BasicTestSuite {
 
   test("decode dictionary") {
     val result = decode(BitVector.encodeAscii("d1:ai6ee").right.get)
-    val expectation = Right(Bencode.BDictionary(Map("a" -> Bencode.BInteger(6))))
+    val expectation = Right(Bencode.BDictionary(("a", Bencode.BInteger(6))))
     assert(result == expectation)
   }
 

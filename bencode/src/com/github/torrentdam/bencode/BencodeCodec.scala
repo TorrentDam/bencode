@@ -73,7 +73,7 @@ object BencodeCodec {
     val dictionaryCodec: Codec[Bencode.BDictionary] =
       (constant('d') ~> listSuccessful(keyValueCodec) <~ constant('e'))
         .xmap(
-          elems => Bencode.BDictionary(elems.toMap),
+          elems => Bencode.BDictionary(elems: _*),
           dict => dict.values.toList
         )
 

@@ -199,7 +199,7 @@ package object format {
           Left(BencodeFormatException("Dictionary is expected"))
       },
       BencodeWriter { a: A =>
-        bFormat.write.run(a).map(bb => Bencode.BDictionary(Map(name -> bb)))
+        bFormat.write.run(a).map(bb => Bencode.BDictionary((name, bb)))
       }
     )
 
@@ -213,7 +213,7 @@ package object format {
       },
       BencodeWriter {
         case Some(value) =>
-          bFormat.write.run(value).map(bb => Bencode.BDictionary(Map(name -> bb)))
+          bFormat.write.run(value).map(bb => Bencode.BDictionary((name, bb)))
         case _ =>
           Right(Bencode.BDictionary.Empty)
       }
