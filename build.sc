@@ -1,22 +1,28 @@
+import $ivy.`com.lihaoyi::mill-contrib-artifactory:$MILL_VERSION`
+
 import mill._
 import mill.scalalib._
 import mill.scalalib.scalafmt.ScalafmtModule
-import $ivy.`com.lihaoyi::mill-contrib-bintray:$MILL_VERSION`
-import mill.contrib.bintray.{BintrayPublishData, BintrayPublishModule}
 import mill.scalalib.publish._
+import mill.contrib.artifactory.ArtifactoryPublishModule
 
-object bencode extends Module with BintrayPublishModule {
+object bencode extends Module with Publishing {
   def ivyDeps = Agg(
     ivy"org.scodec::scodec-core:1.11.4", 
     ivy"org.typelevel::cats-core:${Versions.cats}",
   )
   object test extends TestModule
+}
 
-  def bintrayOwner = "lavrov"
-  def bintrayRepo = "maven"
+trait Publishing extends ArtifactoryPublishModule {
+  import mill.scalalib.publish._
+
+  def artifactoryUri  = "https://maven.pkg.github.com/TorrentDam/bencode"
+
+  def artifactorySnapshotUri = ""
 
   def pomSettings = PomSettings(
-    description = "Bencode codec",
+    description = "Bencode codecs",
     organization = "com.github.torrentdam",
     url = "https://github.com/TorrentDam/bencode",
     licenses = Seq(License.MIT),
@@ -25,11 +31,6 @@ object bencode extends Module with BintrayPublishModule {
       Developer("lavrov", "Vitaly Lavrov","https://github.com/lavrov")
     )
   )
-
-  override def bintrayPublishArtifacts: T[BintrayPublishData] = T {
-    val original = super.bintrayPublishArtifacts()
-    original.copy(payload = original.payload.filterNot(_._2.contains("javadoc")))
-  }
 
   def publishVersion = "0.2.0"
 }
