@@ -8,7 +8,7 @@ import mill.contrib.artifactory.ArtifactoryPublishModule
 
 object bencode extends Module with Publishing {
   def ivyDeps = Agg(
-    ivy"org.scodec::scodec-core:1.11.4", 
+    ivy"org.scodec::scodec-core:${Versions.scodec}",
     ivy"org.typelevel::cats-core:${Versions.cats}",
   )
   object test extends TestModule
@@ -32,23 +32,14 @@ trait Publishing extends ArtifactoryPublishModule {
     )
   )
 
-  def publishVersion = "0.2.0"
+  def publishVersion = "1.0.0"
 }
 
 trait Module extends ScalaModule with ScalafmtModule {
-  def scalaVersion = "2.13.2"
-  def scalacOptions = List(
-    "-language:higherKinds",
-    "-Ymacro-annotations",
-  )
-
-  def scalacPluginIvyDeps = Agg(
-    ivy"org.typelevel:::kind-projector:0.11.0",
-    ivy"com.olegpy::better-monadic-for:0.3.1",
-  )
+  def scalaVersion = "3.0.0"
   trait TestModule extends Tests {
     def ivyDeps = Agg(
-      ivy"com.eed3si9n.verify::verify:0.2.0",
+      ivy"com.eed3si9n.verify::verify:1.0.0",
     )
     def testFrameworks = Seq("verify.runner.Framework")
   }
@@ -56,6 +47,6 @@ trait Module extends ScalaModule with ScalafmtModule {
 
 object Versions {
   val cats = "2.6.1"
-  val `scodec-bits` = "1.1.27"
+  val `scodec` = "2.0.0"
 }
 

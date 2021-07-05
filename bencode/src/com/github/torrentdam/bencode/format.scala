@@ -5,7 +5,6 @@ import cats.data.ReaderT
 import cats.implicits._
 import scodec.Codec
 import scodec.bits.ByteVector
-import shapeless.Typeable
 
 package object format {
 
@@ -23,26 +22,26 @@ package object format {
 
     implicit class Ops[A](val self: BencodeFormat[A]) extends AnyVal {
 
-      def upcast[B >: A](implicit ta: Typeable[A]): BencodeFormat[B] =
+      def upcast[B >: A](implicit ta: reflect.TypeTest[B, A]): BencodeFormat[B] =
         BencodeFormat(
           self.read.widen[B],
-          BencodeWriter { b: B =>
-            ta.cast(b) match {
+          BencodeWriter { (b: B) =>
+            ta.unapply(b) match {
               case Some(a) => self.write(a)
-              case None => Left(BencodeFormatException(s"not a value of type ${ta.describe}"))
+              case None => Left(BencodeFormatException(s"Downcast failed"))
             }
           }
         )
 
       def choose[B](f: A => BencodeFormat[B], g: B => A): BencodeFormat[B] =
         BencodeFormat(
-          BencodeReader { bv: Bencode =>
+          BencodeReader { (bv: Bencode) =>
             self.read(bv).flatMap { a =>
               val format = f(a)
               format.read(bv)
             }
           },
-          BencodeWriter { b: B =>
+          BencodeWriter { (b: B) =>
             val a = g(b)
             val format = f(a)
             for {
@@ -102,8 +101,8 @@ package object format {
           case _ =>
             Left(BencodeFormatException("List is expected"))
         },
-        BencodeWriter { values: List[A] =>
-          values.traverse(aFormat.write.run).map(Bencode.BList)
+        BencodeWriter { (values: List[A]) =>
+          values.traverse(aFormat.write.run).map(Bencode.BList.apply)
         }
       )
     }
@@ -133,7 +132,7 @@ package object format {
           case _ =>
             Left(BencodeFormatException("Dictionary is expected"))
         },
-        BencodeWriter { values: Map[String, A] =>
+        BencodeWriter { (values: Map[String, A]) =>
           values.toList
             .traverse {
               case (key, value) => aFormat.write.run(value).tupleLeft(key)
@@ -168,11 +167,11 @@ package object format {
             BencodeWriter {
               case (a, b) =>
                 for {
-                  ab <- fa.write(a).right.flatMap {
+                  ab <- fa.write(a).flatMap {
                     case Bencode.BDictionary(values) => Right(values)
                     case other => Left(BencodeFormatException("Dictionary expected"))
                   }
-                  bb <- fb.write(b).right.flatMap {
+                  bb <- fb.write(b).flatMap {
                     case Bencode.BDictionary(values) => Right(values)
                     case other => Left(BencodeFormatException("Dictionary expected"))
                   }
@@ -198,7 +197,7 @@ package object format {
         case _ =>
           Left(BencodeFormatException("Dictionary is expected"))
       },
-      BencodeWriter { a: A =>
+      BencodeWriter { (a: A) =>
         bFormat.write.run(a).map(bb => Bencode.BDictionary((name, bb)))
       }
     )
@@ -228,7 +227,7 @@ package object format {
           .left
           .map(err => BencodeFormatException(err.messageWithContext))
       },
-      BencodeWriter { v: A =>
+      BencodeWriter { (v: A) =>
         codec
           .encode(v)
           .toEither

@@ -65,15 +65,15 @@ object BencodeCodec {
         list => list.values
       )
 
-    val keyValueCodec: Codec[String ~ Bencode] = (stringCodec ~ valueCodec).xmap(
-      { case (Bencode.BString(key), value) => (key.decodeAscii.right.get, value) },
-      { case (key, value) => (Bencode.BString(ByteVector.encodeAscii(key).right.get), value) }
+    val keyValueCodec: Codec[(String, Bencode)] = (stringCodec :: valueCodec).xmap(
+      { case (Bencode.BString(key), value) => (key.decodeAscii.toOption.get, value) },
+      { case (key, value) => (Bencode.BString(ByteVector.encodeAscii(key).toOption.get), value) }
     )
 
     val dictionaryCodec: Codec[Bencode.BDictionary] =
       (constant('d') ~> listSuccessful(keyValueCodec) <~ constant('e'))
         .xmap(
-          elems => Bencode.BDictionary(elems: _*),
+          elems => Bencode.BDictionary(elems*),
           dict => dict.values.toList
         )
 
@@ -101,7 +101,7 @@ object BencodeCodec {
       def decode(bits: BitVector): Attempt[DecodeResult[List[A]]] =
         decodeCollectSuccessful[List, A](codec, None)(bits)
       def encode(value: List[A]): Attempt[BitVector] =
-        Encoder.encodeSeq(codec)(value)
+        codec.encodeAll(value)
     }
 
   private def decodeCollectSuccessful[F[_], A](dec: Decoder[A], limit: Option[Int])(

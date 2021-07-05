@@ -4,18 +4,17 @@ import scodec.bits.ByteVector
 
 import scala.collection.immutable.ListMap
 
-sealed trait Bencode
+enum Bencode:
+  case BString(value: ByteVector)
+  case BInteger(value: Long)
+  case BList(values: List[Bencode])
+  case BDictionary(values: ListMap[String, Bencode])
 
 object Bencode {
 
-  case class BString(value: ByteVector) extends Bencode
-  case class BInteger(value: Long) extends Bencode
-  case class BList(values: List[Bencode]) extends Bencode
-  case class BDictionary(values: ListMap[String, Bencode]) extends Bencode
-
   object BString {
     def apply(string: String): BString =
-      new BString(ByteVector.encodeUtf8(string).right.get)
+      new BString(ByteVector.encodeUtf8(string).toOption.get)
     val Empty = new BString(ByteVector.empty)
   }
 

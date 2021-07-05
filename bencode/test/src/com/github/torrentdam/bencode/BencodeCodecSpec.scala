@@ -7,9 +7,9 @@ import verify._
 import scodec.bits.BitVector
 import scala.language.experimental
 
-object BencodeCodecSpec extends BasicTestSuite {
+object BencodeCodecSpec extends BasicTestSuite:
 
-  implicit val charset = Charset.forName("UTF-8")
+  given Charset = Charset.forName("UTF-8")
 
   test("encode/decode positive integer") {
     val encoded = encode(Bencode.BInteger(56L))
@@ -22,34 +22,32 @@ object BencodeCodecSpec extends BasicTestSuite {
   }
 
   test("decode byte string") {
-    val result = decode(BitVector.encodeAscii("2:aa").right.get)
+    val result = decode(BitVector.encodeAscii("2:aa").toOption.get)
     val expectation = Right(Bencode.BString("aa"))
     assert(result == expectation) 
   }
 
   test("decode list") {
-    val result = decode(BitVector.encodeAscii("l1:a2:bbe").right.get)
+    val result = decode(BitVector.encodeAscii("l1:a2:bbe").toOption.get)
     val expectation = Right(Bencode.BList(Bencode.BString("a") :: Bencode.BString("bb") :: Nil))
     assert(result == expectation)
   }
 
   test("decode dictionary") {
-    val result = decode(BitVector.encodeAscii("d1:ai6ee").right.get)
+    val result = decode(BitVector.encodeAscii("d1:ai6ee").toOption.get)
     val expectation = Right(Bencode.BDictionary(("a", Bencode.BInteger(6))))
     assert(result == expectation)
   }
 
   test("encode string value") {
-    assert(encode(Bencode.BString("test")) == BitVector.encodeString("4:test").right.get)
+    val result = encode(Bencode.BString("test"))
+    val Right(expectation) = BitVector.encodeString("4:test")
+    assert(result == expectation)
   }
 
   test("encode list value") {
     val result = encode(Bencode.BList(Bencode.BString("test") :: Bencode.BInteger(10) :: Nil))
-    val expectation =
-      BitVector
-        .encodeString("l4:testi10ee")
-        .right
-        .get
+    val Right(expectation) = BitVector.encodeString("l4:testi10ee")
     assert(result == expectation)
   }
 
@@ -58,5 +56,3 @@ object BencodeCodecSpec extends BasicTestSuite {
     def encoded = encode(data)
     assert(decode(encoded) == Right(data))
   }
-
-}
