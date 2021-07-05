@@ -32,7 +32,9 @@ trait Publishing extends ArtifactoryPublishModule {
     )
   )
 
-  def publishVersion = "1.0.0"
+  def publishVersion = T {
+    T.ctx.env.getOrElse("GITHUB_REF", "1.0.0")
+  }
 }
 
 trait Module extends ScalaModule with ScalafmtModule {

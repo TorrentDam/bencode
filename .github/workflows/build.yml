@@ -23,9 +23,4 @@ jobs:
         java-package: jre
 
     - name: Build
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: ./mill _.test
-
-    - name: Publish
-      run: ./mill bencode.publishArtifactory --credentials lavrov:${{ secrets.GITHUB_TOKEN }}
