@@ -55,7 +55,7 @@ trait Module extends ScalaModule with ScalafmtModule {
 }
 
 object Versions {
-  val cats = "2.2.0-RC2"
-  val `scodec-bits` = "1.1.14"
+  val cats = "2.6.1"
+  val `scodec-bits` = "1.1.27"
 }
 
