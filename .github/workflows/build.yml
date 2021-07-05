@@ -10,11 +10,6 @@ jobs:
 
     - uses: actions/checkout@v1
 
-    - uses: actions/cache@v1
-      with:
-        path: ~/.cache/coursier/v1
-        key: ${{ runner.os }}-coursier-${{ hashFiles('**/build.sc') }}
-
     - name: Set up java
       uses: actions/setup-java@v2.1.0
       with:
