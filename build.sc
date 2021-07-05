@@ -33,7 +33,7 @@ trait Publishing extends ArtifactoryPublishModule {
   )
 
   def publishVersion = T {
-    T.ctx.env.getOrElse("GITHUB_REF", "1.0.0")
+    T.ctx.env.getOrElse("GITHUB_REF", "1.0.0").stripPrefix("refs/tags/")
   }
 }
 
