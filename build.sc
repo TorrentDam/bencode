@@ -1,10 +1,7 @@
-import $ivy.`com.lihaoyi::mill-contrib-artifactory:$MILL_VERSION`
-
 import mill._
+import mill.api.Result
 import mill.scalalib._
 import mill.scalalib.scalafmt.ScalafmtModule
-import mill.scalalib.publish._
-import mill.contrib.artifactory.ArtifactoryPublishModule
 
 object bencode extends Module with Publishing {
   def ivyDeps = Agg(
@@ -14,26 +11,27 @@ object bencode extends Module with Publishing {
   object test extends TestModule
 }
 
-trait Publishing extends ArtifactoryPublishModule {
+trait Publishing extends PublishModule {
   import mill.scalalib.publish._
 
-  def artifactoryUri  = "https://maven.pkg.github.com/TorrentDam/bencode"
-
-  def artifactorySnapshotUri = ""
+  def sonatypeUri: String = "https://s01.oss.sonatype.org/service/local"
 
   def pomSettings = PomSettings(
     description = "Bencode codecs",
-    organization = "com.github.torrentdam",
-    url = "https://github.com/TorrentDam/bencode",
+    organization = "io.github.torrentdam.bencode",
+    url = "https://github.com/TorrentDamDev/bencode",
     licenses = Seq(License.MIT),
-    versionControl = VersionControl.github("TorrentDam", "bencode"),
+    versionControl = VersionControl.github("TorrentDamDev", "bencode"),
     developers = Seq(
       Developer("lavrov", "Vitaly Lavrov","https://github.com/lavrov")
     )
   )
 
-  def publishVersion = T {
-    T.ctx.env.getOrElse("GITHUB_REF", "1.0.0").stripPrefix("refs/tags/")
+  def publishVersion = T.input {
+    T.ctx.env.get("VERSION") match {
+      case Some(version) => Result.Success(version)
+      case None => Result.Failure("VERSION env variable is undefined")
+    }
   }
 }
 
