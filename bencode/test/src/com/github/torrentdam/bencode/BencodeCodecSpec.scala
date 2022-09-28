@@ -41,13 +41,13 @@ object BencodeCodecSpec extends BasicTestSuite:
 
   test("encode string value") {
     val result = encode(Bencode.BString("test"))
-    val Right(expectation) = BitVector.encodeString("4:test")
+    val Right(expectation) = BitVector.encodeString("4:test"): @unchecked
     assert(result == expectation)
   }
 
   test("encode list value") {
     val result = encode(Bencode.BList(Bencode.BString("test") :: Bencode.BInteger(10) :: Nil))
-    val Right(expectation) = BitVector.encodeString("l4:testi10ee")
+    val Right(expectation) = BitVector.encodeString("l4:testi10ee"): @unchecked
     assert(result == expectation)
   }
 

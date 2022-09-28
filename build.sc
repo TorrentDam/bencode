@@ -36,7 +36,7 @@ trait Publishing extends PublishModule {
 }
 
 trait Module extends ScalaModule with ScalafmtModule {
-  def scalaVersion = "3.0.0"
+  def scalaVersion = "3.2.0"
   trait TestModule extends Tests {
     def ivyDeps = Agg(
       ivy"com.eed3si9n.verify::verify:1.0.0",
