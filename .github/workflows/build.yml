@@ -17,8 +17,11 @@ jobs:
         java-version: 14
         java-package: jre
 
-    - name: Build
-      run: ./mill _.test
+    - name: Build JVM
+      run: ./mill bencode.test
+
+    - name: Build native
+      run: ./mill bencode.native.test
 
   release:
     needs: build
@@ -34,4 +37,7 @@ jobs:
           echo ${PGP_SECRET_KEY} | base64 --decode | gpg --import
           export VERSION=${GITHUB_REF#*/v} 
           echo Publishing $VERSION
-          ./mill bencode.publish --sonatypeCreds $SONATYPE_CREDS --gpgArgs "--batch,-a,-b"
+          echo Publishing JVM
+          ./mill bencode.publish --sonatypeCreds $SONATYPE_CREDS --gpgArgs --batch --gpgArgs -ab --gpgArgs --yes
+          echo Publishing native
+          ./mill bencode.native.publish --sonatypeCreds $SONATYPE_CREDS --gpgArgs --batch --gpgArgs -ab --gpgArgs --yes
