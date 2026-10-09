@@ -17,7 +17,10 @@ jobs:
         java-version: 21
 
     - name: Build JVM
-      run: ./mill bencode.test
+      run: ./mill bencode.jvm.test
+
+    - name: Build JS
+      run: ./mill bencode.js.test
 
     - name: Build native
       run: ./mill bencode.native.test

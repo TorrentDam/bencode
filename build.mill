@@ -6,60 +6,67 @@ import mill.api.Result
 import mill.scalalib.*
 import mill.scalalib.publish.*
 import mill.scalalib.scalafmt.ScalafmtModule
+import mill.scalajslib.*
 import mill.scalanativelib.*
 
-object bencode extends Module, Publishing {
-  def mvnDeps = Seq(
-    mvn"org.scodec::scodec-core::${Versions.scodec}",
-    mvn"org.typelevel::cats-core::${Versions.cats}"
-  )
-  object test extends ScalaTests, TestModule
+object bencode extends Module {
 
-  object native extends NativeModule, Publishing {
-    def moduleDir = bencode.moduleDir
-    def mvnDeps = bencode.mvnDeps
-    object test extends ScalaNativeTests, TestModule
-  }
-}
+  trait Shared extends PlatformScalaModule, PublishModule, ScalafmtModule {
+    def scalaVersion = Versions.scala
 
-trait Publishing extends PublishModule {
-  def artifactName = "bencode"
-
-  def pomSettings = PomSettings(
-    description = "Bencode codecs",
-    organization = "io.github.torrentdam.bencode",
-    url = "https://github.com/TorrentDamDev/bencode",
-    licenses = Seq(License.MIT),
-    versionControl = VersionControl.github("TorrentDamDev", "bencode"),
-    developers = Seq(
-      Developer("lavrov", "Vitaly Lavrov", "https://github.com/lavrov")
+    def mvnDeps = Seq(
+      mvn"org.scodec::scodec-core::${Versions.scodec}",
+      mvn"org.typelevel::cats-core::${Versions.cats}"
     )
-  )
 
-  def publishVersion = Task.Input {
-    Task.env.get("VERSION") match {
-      case Some(version) => Result.Success(version)
-      case None => Result.Failure("VERSION env variable is undefined")
+    def artifactName = "bencode"
+
+    def pomSettings = PomSettings(
+      description = "Bencode codecs",
+      organization = "io.github.torrentdam.bencode",
+      url = "https://github.com/TorrentDamDev/bencode",
+      licenses = Seq(License.MIT),
+      versionControl = VersionControl.github("TorrentDamDev", "bencode"),
+      developers = Seq(
+        Developer("lavrov", "Vitaly Lavrov", "https://github.com/lavrov")
+      )
+    )
+
+    def publishVersion = Task.Input {
+      Task.env.get("VERSION") match {
+        case Some(version) => Result.Success(version)
+        case None => Result.Failure("VERSION env variable is undefined")
+      }
     }
   }
-}
 
-trait Module extends ScalaModule, ScalafmtModule {
-  def scalaVersion = "3.3.8"
-}
+  trait SharedTests extends TestModule {
+    def mvnDeps = Seq(
+      mvn"com.eed3si9n.verify::verify::${Versions.verify}"
+    )
+    def testFramework = "verify.runner.Framework"
+  }
 
-trait TestModule extends mill.scalalib.TestModule {
-  def mvnDeps = Seq(
-    mvn"com.eed3si9n.verify::verify::1.0.0"
-  )
-  def testFramework = "verify.runner.Framework"
-}
+  object jvm extends Shared {
+    object test extends ScalaTests, SharedTests
+  }
 
-trait NativeModule extends Module, ScalaNativeModule {
-  def scalaNativeVersion = "0.5.12"
+  object js extends Shared, ScalaJSModule {
+    def scalaJSVersion = Versions.scalaJS
+    object test extends ScalaJSTests, SharedTests
+  }
+
+  object native extends Shared, ScalaNativeModule {
+    def scalaNativeVersion = Versions.scalaNative
+    object test extends ScalaNativeTests, SharedTests
+  }
 }
 
 object Versions {
+  val scala = "3.3.8"
+  val scalaJS = "1.22.0"
+  val scalaNative = "0.5.12"
   val cats = "2.13.0"
-  val `scodec` = "2.3.3"
+  val scodec = "2.3.3"
+  val verify = "1.0.0"
 }
