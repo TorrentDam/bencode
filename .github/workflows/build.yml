@@ -33,11 +33,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Release
         env:
-          SONATYPE_CREDS: ${{ secrets.SONATYPE_CREDS }}
-          MILL_PGP_SECRET_BASE64: ${{ secrets.PGP_SECRET_KEY }}
+          MILL_SONATYPE_USERNAME: ${{ secrets.MILL_SONATYPE_USERNAME }}
+          MILL_SONATYPE_PASSWORD: ${{ secrets.MILL_SONATYPE_PASSWORD }}
+          MILL_PGP_SECRET_BASE64: ${{ secrets.MILL_PGP_SECRET_BASE64 }}
+          MILL_PGP_PASSPHRASE: ${{ secrets.MILL_PGP_PASSPHRASE }}
         run: |
           export VERSION=${GITHUB_REF#*/v}
-          export MILL_SONATYPE_USERNAME=${SONATYPE_CREDS%%:*}
-          export MILL_SONATYPE_PASSWORD=${SONATYPE_CREDS#*:}
           echo Publishing $VERSION
           ./mill mill.javalib.SonatypeCentralPublishModule/
